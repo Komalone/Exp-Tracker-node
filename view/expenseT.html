@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <style>
+        body{
+            padding: 0px 80px;
+            font-size: 18px;
+        }
+        h3{
+            text-align: center;
+        }
+        .container{
+            padding: 0 200px;
+            display: grid;
+        }
+        input{
+            display: block;
+            position: relative;
+            top: 5px;
+            padding: 4px;
+        }
+        .del{
+            position: fixed;
+            right: 8rem;
+            background-color: rgb(212, 49, 49);
+            color: white;
+        }
+        .edit{
+            position: fixed;
+            right: 13rem;
+            background-color: rgb(106, 175, 74);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h3>EXPENSE TRACKER APP</h3>
+    </div>
+ 
+    <form id="form" onsubmit="expenses(event)">
+        <div class="container">
+        <label>Expense Amount</label>
+        <input type="number" id="amount" name="amount" required/><br>
+        <label>Choose descripton</label>
+        <input type="text" id="desc" name="desc" required/><br>
+        <label>Choose Category</label>
+        <input type="text" id="plan" name="plan" required/><br>
+        <button>Add Expense</button>
+        </div>
+        
+    </form>
+    <ul id="expenseList" class="lists">
+
+    </ul>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
+    <script>
+        function expenses(event){
+    event.preventDefault();
+    const amount=document.getElementById('amount').value;
+    const desc= document.getElementById('desc').value;
+    const cato=document.getElementById('plan').value;
+
+    const obj={
+        amount,
+        desc,
+        cato
+    };
+
+    async function postExp(obj){
+        //console.log("html",obj)
+     try{  
+        const pro= await axios.post("http://localhost:3000/expense-tracker", obj)
+        //showExpList(pro.data)
+        console.log("post",pro.data)
+        }
+    
+    catch(err)
+    {
+        document.body.innerHTML= document.body.innerHTML + '<h5>Something went wrong</h5>'
+        console.log(err)
+    }
+    }
+
+   postExp(obj)
+}
+window.addEventListener("DOMContentLoaded",async ()=>{
+    //console.log("html",axios)
+    try{
+    const response= await axios.get("http://localhost:3000/expense-tracker");
+        console.log('show', response.data.expDetail)
+        const expList= response.data.expDetail;
+        showExpList(expList);
+    }
+    catch(err){
+        console.log(err)
+    }
+})
+
+async function showExpList(expList){
+
+    // document.getElementById('amount').value='';
+    // document.getElementById('task').value='';
+    // document.getElementById('plan').value='';
+    const parentNode=document.getElementById('expenseList');
+    expList.forEach(exp => {
+        const childNode= document.createElement('li');
+        childNode.setAttribute('id', exp.id);
+        const delbtn= document.createElement('button');
+        const editbtn= document.createElement('button');
+        delbtn.textContent='DELETE';
+        editbtn.textContent='EDIT';
+        delbtn.setAttribute('class', 'del');
+        editbtn.setAttribute('class', 'edit');
+        childNode.textContent=`Rs:${exp.amount} for ${exp.category} - ${exp.desciption}`;
+        delbtn.addEventListener('click', async()=>{ 
+                    const response= await axios.delete(`http://localhost:3000/expense-tracker/${exp.id}`)
+                });
+        childNode.append(delbtn)
+        childNode.append(editbtn);
+        parentNode.append(childNode);
+    });
+}
+
+
+async function deletebtn(expId){
+    try{
+        console.log(expId);
+    }
+    
+    catch(err){
+        console.log(err)
+    }
+}
+
+    </script>
+</body>
+</html>
